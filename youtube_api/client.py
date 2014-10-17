@@ -1,3 +1,4 @@
+from copy import deepcopy
 import logging
 import requests
 
@@ -58,7 +59,7 @@ class Client(object):
         if len(resource_filter) > 1:
             raise OneFilterAllowed('YouTube allows one filter per request only')
 
-        _filter = resource_filter.keys()[0]
+        _filter, value = deepcopy(resource_filter).popitem()
         if _filter not in self.allowed_filters:
             raise FilterNotAllowed('{0} is not an allowed filter'.format(_filter))
 

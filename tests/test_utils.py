@@ -1,4 +1,5 @@
 from youtube_api.utils import minutes_and_seconds_from_duration, duration_in_seconds
+
 DURATION = 'PT3M20S'
 
 def test_minutes_and_seconds_from_duration():
