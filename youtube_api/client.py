@@ -103,6 +103,11 @@ class VideoAPI(Client):
                                         'videoCategoryId')
 
     def calculate_quota(self, parts):
+        """
+        Returns the quota used for the
+        :param parts:
+        :return:
+        """
         return sum((self.allowed_parts[part] for part in parts))
 
     def get_videos(self, resource_filter, parts, optional_params):
@@ -118,6 +123,15 @@ class VideoAPI(Client):
         return response.json
 
     def get_video_by_id(self, video_id, parts=('snippet',), optional_params={}):
+        """
+        Returns a video looking up by ID
+
+        :param video_id: string
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: serialised json response
+        """
         return self.get_videos(resource_filter={'id': video_id}, parts=parts, optional_params=optional_params)
+
 
 
