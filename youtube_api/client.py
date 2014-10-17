@@ -1,6 +1,6 @@
 import logging
-
 import requests
+
 from .exceptions import YouTubeBadRequest, YouTubeForbidden, PartNotAllowed, FilterNotAllowed, OneFilterAllowed, \
     OptionalParamNotAllowed
 
@@ -118,4 +118,5 @@ class VideoAPI(Client):
 
     def get_video_by_id(self, video_id, parts=('snippet',), optional_params={}):
         return self.get_videos(resource_filter={'id': video_id}, parts=parts, optional_params=optional_params)
+
 

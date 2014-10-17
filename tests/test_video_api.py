@@ -3,8 +3,6 @@ import pytest
 from youtube_api.client import VideoAPI
 from youtube_api.exceptions import *
 
-from mock import patch
-
 
 @pytest.mark.parametrize(('resource_filter', 'parts', 'optional_params', 'expected_exception'), [
     ({'id': 1},            ('test',),    {},              PartNotAllowed),

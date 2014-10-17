@@ -2,4 +2,4 @@
 YouTube API Wrapper
 ===================
 
-Global Radio
+Python YouTube API Wrapper.

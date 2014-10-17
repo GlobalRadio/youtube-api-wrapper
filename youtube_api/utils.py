@@ -1,9 +1,13 @@
-def humanize_youtube_duration(duration):
+def minutes_and_seconds_from_duration(duration):
     """
-    https://developers.google.com/youtube/v3/docs/videos
-
-    :param duration: string in the YouTube format
-    :return: string with formatted duration
+    Returns a tuple of integers minutes, seconds
+    :param duration:
+    :return:
     """
     minutes, seconds = duration[2:].split('M')
-    return '{minutes} min {seconds} sec'.format(minutes=minutes, seconds=seconds[:-1])
+    return int(minutes), int(seconds[:-1])
+
+
+def duration_in_seconds(duration):
+    minutes, seconds = minutes_and_seconds_from_duration(duration)
+    return minutes*60 + seconds
