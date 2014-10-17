@@ -21,7 +21,7 @@ Examples:
     video = client.get_video_by_id('Video Id')
 
 
-By default only snippet part is retrieved. Querying for more parts https://developers.google.com/youtube/v3/getting-started#part
+By default only snippet part is retrieved. `Querying for more parts. <https://developers.google.com/youtube/v3/getting-started#part>`_
 results in an higher quota consumption. It's possible to check the quota used before submitting the query by calling:
 
 .. code-block:: python
