@@ -46,7 +46,8 @@ class Client(object):
     def digest_request_params(self, resource_filter, parts, optional_params):
         self.validate_resource_filter(resource_filter)
         self.validate_parts(parts)
-        self.validate_optional_params(optional_params)
+        if optional_params:
+            self.validate_optional_params(optional_params)
 
         # if validation passes
         params = {'part': ','.join(parts)}
@@ -56,13 +57,17 @@ class Client(object):
         return params
 
     def validate_resource_filter(self, resource_filter):
-        intersection = self.allowed_filters & frozenset(resource_filter.keys())
+        resource_filter_keys = resource_filter.keys()
+        
+        if len(resource_filter_keys) > 1:
+            raise OneFilterAllowed('YouTube allows one filter per request only')
+
+        intersection = self.allowed_filters & frozenset(resource_filter_keys)
 
         if not intersection:
              raise FilterNotAllowed('{0} is not an allowed filter'.format(resource_filter.keys()))
 
-        if len(intersection) > 1:
-            raise OneFilterAllowed('YouTube allows one filter per request only')
+
 
     def validate_parts(self, parts):
         frozen_parts = frozenset(parts) # free in Python 3.x
@@ -71,15 +76,16 @@ class Client(object):
 
         if not intersection:
             not_allowed_parts = frozen_allowed_parts - frozen_parts
-            raise PartNotAllowed('{0} not allowed part(s)'.format(','.join(not_allowed_parts)))
+            raise PartNotAllowed('{0} not allowed part(s)'.format(', '.join(not_allowed_parts)))
 
     def validate_optional_params(self, optional_params):
         frozen_params = frozenset(optional_params.keys())
         frozen_allowed_params = frozenset(self.allowed_optional_params)
         intersection = frozen_params & frozen_allowed_params
+
         if not intersection:
             not_allowed_params = frozen_allowed_params - frozen_params
-            raise OptionalParamNotAllowed('{0} not allowed param(s)'.format(','.join(not_allowed_params)))
+            raise OptionalParamNotAllowed('{0} not allowed param(s)'.format(', '.join(not_allowed_params)))
 
 
 class VideoAPI(Client):

@@ -7,7 +7,7 @@ def minutes_and_seconds_from_duration(duration):
     Returns a tuple of integers minutes, seconds from the YouTube duration format
     which is PT3M20S
     :param duration: string YouTube duration
-    :return:
+    :return: tuple of integers
     """
     match = DURATION_REGEX.match(duration)
     minutes = match.group('minutes')
