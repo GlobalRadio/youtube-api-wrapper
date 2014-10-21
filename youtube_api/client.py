@@ -56,22 +56,30 @@ class Client(object):
         return params
 
     def validate_resource_filter(self, resource_filter):
-        if len(resource_filter) > 1:
+        intersection = self.allowed_filters & frozenset(resource_filter.keys())
+
+        if not intersection:
+             raise FilterNotAllowed('{0} is not an allowed filter'.format(resource_filter.keys()))
+
+        if len(intersection) > 1:
             raise OneFilterAllowed('YouTube allows one filter per request only')
 
-        _filter, value = deepcopy(resource_filter).popitem()
-        if _filter not in self.allowed_filters:
-            raise FilterNotAllowed('{0} is not an allowed filter'.format(_filter))
-
     def validate_parts(self, parts):
-        not_allowed_parts = [part for part in parts if part not in self.allowed_parts]
-        if not_allowed_parts:
-            raise PartNotAllowed('{0} is not an allowed part'.format(','.join(not_allowed_parts)))
+        frozen_parts = frozenset(parts) # free in Python 3.x
+        frozen_allowed_parts = frozenset(self.allowed_parts.keys()) # free in Python 3.x
+        intersection = frozen_parts & frozen_allowed_parts
+
+        if not intersection:
+            not_allowed_parts = frozen_allowed_parts - frozen_parts
+            raise PartNotAllowed('{0} not allowed part(s)'.format(','.join(not_allowed_parts)))
 
     def validate_optional_params(self, optional_params):
-        not_allowed_params = [param for param in optional_params.keys() if param not in self.allowed_optional_params]
-        if not_allowed_params:
-            raise OptionalParamNotAllowed('{0} is not allowed params'.format(','.join(not_allowed_params)))
+        frozen_params = frozenset(optional_params.keys())
+        frozen_allowed_params = frozenset(self.allowed_optional_params)
+        intersection = frozen_params & frozen_allowed_params
+        if not intersection:
+            not_allowed_params = frozen_allowed_params - frozen_params
+            raise OptionalParamNotAllowed('{0} not allowed param(s)'.format(','.join(not_allowed_params)))
 
 
 class VideoAPI(Client):
@@ -93,20 +101,20 @@ class VideoAPI(Client):
                               'status': 2,
                               'suggestions': 1,
                               'topicDetails': 2}
-        self.allowed_filters = ('chart',
+        self.allowed_filters = frozenset(('chart',
                                 'id',
-                                'myRating')
-        self.allowed_optional_params = ('maxResults',
+                                'myRating'))
+        self.allowed_optional_params = frozenset(('maxResults',
                                         'onBehalfOfContentOwner',
                                         'pageToken',
                                         'regionCode',
-                                        'videoCategoryId')
+                                        'videoCategoryId'))
 
     def calculate_quota(self, parts):
         """
         Returns the quota used for the
-        :param parts:
-        :return:
+        :param parts: Parts to be checked
+        :return: Quota used
         """
         return sum((self.allowed_parts[part] for part in parts))
 

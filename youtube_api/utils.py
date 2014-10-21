@@ -1,11 +1,18 @@
+import re
+
+DURATION_REGEX = re.compile(r'PT(?P<minutes>\d+)M(?P<seconds>\d+)')
+
 def minutes_and_seconds_from_duration(duration):
     """
-    Returns a tuple of integers minutes, seconds
-    :param duration:
+    Returns a tuple of integers minutes, seconds from the YouTube duration format
+    which is PT3M20S
+    :param duration: string YouTube duration
     :return:
     """
-    minutes, seconds = duration[2:].split('M')
-    return int(minutes), int(seconds[:-1])
+    match = DURATION_REGEX.match(duration)
+    minutes = match.group('minutes')
+    seconds = match.group('seconds')
+    return int(minutes), int(seconds)
 
 
 def duration_in_seconds(duration):
