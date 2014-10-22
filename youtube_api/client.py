@@ -134,7 +134,7 @@ class VideoAPI(Client):
         :return: serialised json response
         """
         response = self.get_resource(resource_filter, parts, optional_params=optional_params)
-        return response.json
+        return response.json()
 
     def get_video_by_id(self, video_id, parts=('snippet',), optional_params={}):
         """
