@@ -20,13 +20,11 @@ Documentation
 `Read the docs <http://youtube-api-wrapper.readthedocs.org/en/latest/>`_
 
 
-Installation of Dependencies
-=============================
+Installation
+============
 
-Depending on where you are installing dependencies:
+Using PyPi::
 
-In development::
-
-    $ pip install -r requirements/local.txt
+    $ pip install youtube_api
 
 
