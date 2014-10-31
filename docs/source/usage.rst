@@ -7,7 +7,7 @@ Videos
 
 The VideoApi class gives access to the `Videos API endpoint. <https://developers.google.com/youtube/v3/docs/videos>`_ .
 
-.. automodule:: VideoApi
+.. automodule:: youtube_api.client
    :members:
 
 Examples:

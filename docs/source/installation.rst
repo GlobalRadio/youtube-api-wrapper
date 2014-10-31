@@ -7,4 +7,4 @@ Install the library
 
 .. tip::
 
-    Work in a `virtual environment`_!
+    Work in a virtual environment!

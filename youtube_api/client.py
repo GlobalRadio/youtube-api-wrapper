@@ -58,7 +58,7 @@ class Client(object):
 
     def validate_resource_filter(self, resource_filter):
         resource_filter_keys = resource_filter.keys()
-        
+
         if len(resource_filter_keys) > 1:
             raise OneFilterAllowed('YouTube allows one filter per request only')
 
