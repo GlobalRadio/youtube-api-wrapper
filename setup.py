@@ -26,5 +26,5 @@ setup(name='youtube_api',
           'Programming Language :: Python',
           'Topic :: Software Development :: Libraries :: Python Modules'],
       install_requires=[
-          'requests>=2.0'],
+          'requests>=2.6'],
       )
