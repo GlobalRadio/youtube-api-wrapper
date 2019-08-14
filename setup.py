@@ -6,9 +6,9 @@ from youtube_api import VERSION
 
 setup(name='youtube_api',
       version=VERSION,
-      url='https://github.com/GlobalRadio/youtube-api-wrapper',
-      author="Alessandro De Noia - Global Radio",
-      author_email="alessandro.denoia@thisisglobal.com",
+      url='https://github.com/TomoriBot/youtube-api-wrapper',
+      author="Pineapple Cookie",
+      author_email="pineapple.cookie.373@gmail.com",
       description="A (work in progress) Python YouTube API Wrapper.",
       long_description=open('README.rst').read(),
       keywords="YouTube, Api",

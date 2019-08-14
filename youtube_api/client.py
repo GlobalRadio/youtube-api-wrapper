@@ -148,4 +148,60 @@ class VideoAPI(Client):
         return self.get_videos(resource_filter={'id': video_id}, parts=parts, optional_params=optional_params)
 
 
+class CommentThreadsAPI(Client):
+    """
+    CommentThreads endpoint specific client https://developers.google.com/youtube/v3/docs/commentThreads/
+    """
+    def __init__(self, api_key):
+        super(CommentThreadsAPI, self).__init__(api_key)
+        self.resource_type = 'commentThreads'
+        self.allowed_parts = {
+              'id': 0,
+              'replies': 2,
+              'snippet': 2
+        }
+        self.allowed_filters = frozenset((
+            'allThreadsRelatedToChannelId',
+            'channelId',
+            'id',
+            'videoId'
+        ))
+        self.allowed_optional_params = frozenset((
+            'maxResults',
+            'moderationStatus',
+            'order',
+            'pageToken',
+            'searchTerms',
+            'textFormat'
+        ))
 
+    def calculate_quota(self, parts):
+        """
+        Returns the quota used for the
+        :param parts: Parts to be checked
+        :return: Quota used
+        """
+        return sum((self.allowed_parts[part] for part in parts))
+
+    def get_commentThreads(self, resource_filter, parts=('snippet',), optional_params={}):
+        """
+        Get a list of comment threads
+
+        :param resource_filter: dictionary with one key:value pair only
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: List of Comment objects
+        """
+        response = self.get_resource(resource_filter, parts, optional_params=optional_params)
+        return response.json()
+
+    def get_comments_by_id(self, video_id):
+        """
+        Returns a list of comments by video's ID
+
+        :param video_id: string
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: List of Comment objects
+        """
+        return self.get_commentThreads(resource_filter={'videoId': video_id}, optional_params={'textFormat': 'plainText'})
