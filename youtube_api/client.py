@@ -2,8 +2,8 @@ from copy import deepcopy
 import logging
 import requests
 
-from .exceptions import YouTubeBadRequest, YouTubeForbidden, PartNotAllowed, FilterNotAllowed, OneFilterAllowed, \
-    OptionalParamNotAllowed
+from .exceptions import *
+from .classes import *
 
 
 ENDPOINT = "https://www.googleapis.com/youtube/v3/{resource_type}"
@@ -31,7 +31,11 @@ class Client(object):
         :param optional_params: dictionary with all the params
         :return: requests response object
         """
-        ERRORS_MAPPING = {'400': YouTubeBadRequest, '403': YouTubeForbidden}
+        ERRORS_MAPPING = {
+            '400': YouTubeBadRequest,
+            '403': YouTubeForbidden,
+            '404': YoutubeNotFound
+        }
 
         params = self.digest_request_params(resource_filter, parts, optional_params)
 
@@ -192,8 +196,9 @@ class CommentThreadsAPI(Client):
         :param optional_params: dictionary, usually filter params
         :return: List of Comment objects
         """
-        response = self.get_resource(resource_filter, parts, optional_params=optional_params)
-        return response.json()
+        response = self.get_resource(resource_filter, parts, optional_params=optional_params).json()
+        comment_threads = CommentThreadList(response)
+        return comment_threads
 
     def get_comments_by_id(self, video_id):
         """
