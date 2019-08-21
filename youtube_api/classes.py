@@ -92,7 +92,7 @@ class CommentThread:
         self.canReply = self._snippet.get("canReply", False)
         self.isPublic = self._snippet.get("isPublic", False)
         self.replies_count = self._snippet.get("totalReplyCount", 0)
-        self.topLevelComment = self._snippet.get("topLevelComment", None)
+        self.topLevelComment = Comment(self._snippet.get("topLevelComment", None))
         self.replies = []
         self._replies = kwargs.get("replies", {}).get("comments", [])
         for comment in self._replies:
@@ -100,6 +100,7 @@ class CommentThread:
 
         self._printable_items = [
             "replies_count",
+            "topLevelComment",
             "replies"
         ]
 

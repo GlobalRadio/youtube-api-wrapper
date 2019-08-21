@@ -32,9 +32,9 @@ class Client(object):
         :return: requests response object
         """
         ERRORS_MAPPING = {
-            '400': YouTubeBadRequest,
-            '403': YouTubeForbidden,
-            '404': YoutubeNotFound
+            400: YouTubeBadRequest,
+            403: YouTubeForbidden,
+            404: YoutubeNotFound
         }
 
         params = self.digest_request_params(resource_filter, parts, optional_params)
@@ -44,7 +44,7 @@ class Client(object):
         response = requests.get(url, params=params)
 
         if response.status_code in ERRORS_MAPPING:
-            raise ERRORS_MAPPING[response.status_code](response.json['message'])
+            raise ERRORS_MAPPING[response.status_code](response.json()["error"]["errors"][0]["reason"])
         return response
 
     def digest_request_params(self, resource_filter, parts, optional_params):
@@ -200,13 +200,38 @@ class CommentThreadsAPI(Client):
         comment_threads = CommentThreadList(response)
         return comment_threads
 
-    def get_comments_by_id(self, video_id):
+    def get_comments_by_id(self, video_id, by_time=True):
         """
         Returns a list of comments by video's ID
 
         :param video_id: string
         :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
         :param optional_params: dictionary, usually filter params
-        :return: List of Comment objects
+        :return: Iterator of Comment objects
         """
-        return self.get_commentThreads(resource_filter={'videoId': video_id}, optional_params={'textFormat': 'plainText'})
+        next = None
+        while True:
+            try:
+                params = {
+                    'moderationStatus': 'published',
+                    'textFormat': 'plainText',
+                    'order': 'time' if by_time else 'relevance',
+                    'maxResults': 20
+                }
+                if next:
+                    params['pageToken'] = next
+                threads = self.get_commentThreads(
+                    resource_filter={'videoId': video_id},
+                    parts=('snippet','replies',),
+                    optional_params=params
+                )
+            except:
+                break
+
+            next = threads.nextPageToken
+
+            for comment in threads.comments:
+                yield comment.topLevelComment
+
+            if not next:
+                break
