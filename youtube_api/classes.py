@@ -28,7 +28,7 @@ class Channel:
 class User:
     def __init__(self, kwargs):
         self.name = kwargs.get("authorDisplayName", "Unknown Name")
-        self.avatar = kwargs.get("authorDisplayName", None)
+        self.avatar = kwargs.get("authorProfileImageUrl", None)
         self.channel = Channel(
             url=kwargs.get("authorChannelUrl"),
             id=kwargs.get("authorChannelId", {}).get("value")
@@ -66,6 +66,7 @@ class Comment:
         self.publishedAt = get_utc_from_string(self._snippet.get("publishedAt", None))
         self.updatedAt = get_utc_from_string(self._snippet.get("updatedAt", None))
         self.author = User(self._snippet)
+        self.replies = []
 
         self._printable_items = [
             "text",
@@ -97,6 +98,7 @@ class CommentThread:
         self._replies = kwargs.get("replies", {}).get("comments", [])
         for comment in self._replies:
             self.replies.append(Comment(comment))
+            self.topLevelComment.replies.append(Comment(comment))
 
         self._printable_items = [
             "replies_count",
