@@ -13,18 +13,3 @@ A (work in progress) Python YouTube API Wrapper.
 .. image:: https://readthedocs.org/projects/youtube-api-wrapper/badge/?version=latest
     :target: https://readthedocs.org/projects/youtube-api-wrapper/?badge=latest
     :alt: Documentation Status
-
-Documentation
-=============
-
-`Read the docs <http://youtube-api-wrapper.readthedocs.org/en/latest/>`_
-
-
-Installation
-============
-
-Using PyPi::
-
-    $ pip install youtube_api
-
-
