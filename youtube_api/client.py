@@ -235,3 +235,39 @@ class CommentThreadsAPI(Client):
 
             if not next:
                 break
+
+    def get_comments_by_channel_id(self, channel_id, by_time=True):
+        """
+        Returns a list of comments by channel's ID
+
+        :param channel_id: string
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: Iterator of Comment objects
+        """
+        next = None
+        while True:
+            try:
+                params = {
+                    'moderationStatus': 'published',
+                    'textFormat': 'plainText',
+                    'order': 'time' if by_time else 'relevance',
+                    'maxResults': 20
+                }
+                if next:
+                    params['pageToken'] = next
+                threads = self.get_commentThreads(
+                    resource_filter={'allThreadsRelatedToChannelId': channel_id},
+                    parts=('snippet','replies',),
+                    optional_params=params
+                )
+            except:
+                break
+
+            next = threads.nextPageToken
+
+            for comment in threads.comments:
+                yield comment.topLevelComment
+
+            if not next:
+                break
