@@ -47,6 +47,71 @@ class Client(object):
             raise ERRORS_MAPPING[response.status_code](response.json()["error"]["errors"][0]["reason"])
         return response
 
+    def authorize(self):
+        SCOPES = {
+            'general': 'https://www.googleapis.com/auth/youtube',
+            'channel': 'https://www.googleapis.com/auth/youtube.force-ssl',
+            'view': 'https://www.googleapis.com/auth/youtube.readonly',
+            'video': 'https://www.googleapis.com/auth/youtube.upload',
+            'assets': 'https://www.googleapis.com/auth/youtubepartner',
+            'audit': 'https://www.googleapis.com/auth/youtubepartner-channel-audit'
+        }
+        pass
+
+    def get_auth_resource(self, resource_filter, parts, optional_params):
+        """
+        Low level generic method to get resource, used by other methods that add specific params for each resource
+        with authorization before request
+
+        :param resource_type: string with resource type to create the complete endpoint
+        :param resource_filter: dictionary with the filter to be used
+        :param parts: dictionary with the parts to be returned
+        :param optional_params: dictionary with all the params
+        :return: requests response object
+        """
+
+        ERRORS_MAPPING = {
+            400: YouTubeBadRequest,
+            403: YouTubeForbidden,
+            404: YoutubeNotFound
+        }
+
+        params = self.digest_request_params(resource_filter, parts, optional_params)
+
+        url = ENDPOINT.format(resource_type=self.resource_type)
+        params.update({'key': self.api_key})
+        self.authorize()
+        response = requests.get(url, params=params, headers={"Authorization": self.access_token})
+
+        if response.status_code in ERRORS_MAPPING:
+            raise ERRORS_MAPPING[response.status_code](response.json()["error"]["errors"][0]["reason"])
+        return response
+
+    def post_resource(self, parts, optional_params):
+        """
+        Low level generic method to post resource, used by other methods that add specific params for each resource
+
+        :param parts: dictionary with the parts to be returned
+        :param optional_params: dictionary with all the params
+        :return: requests response object
+        """
+        ERRORS_MAPPING = {
+            400: YouTubeBadRequest,
+            403: YouTubeForbidden,
+            404: YoutubeNotFound
+        }
+
+        params = {'part': ','.join(parts)}
+        params.update(optional_params)
+
+        url = ENDPOINT.format(resource_type=self.resource_type)
+        params.update({'key': self.api_key})
+        response = requests.post(url, params=params)
+
+        if response.status_code in ERRORS_MAPPING:
+            raise ERRORS_MAPPING[response.status_code](response.json()["error"]["errors"][0]["reason"])
+        return response
+
     def digest_request_params(self, resource_filter, parts, optional_params):
         self.validate_resource_filter(resource_filter)
         self.validate_parts(parts)
@@ -151,6 +216,42 @@ class VideoAPI(Client):
         """
         return self.get_videos(resource_filter={'id': video_id}, parts=parts, optional_params=optional_params)
 
+    def get_videos_by_channel_id(self, channel_id, by_time=True):
+        """
+        Returns a list of comments by channel's ID
+
+        :param channel_id: string
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: Iterator of Comment objects
+        """
+        next = None
+        while True:
+            try:
+                params = {
+                    'moderationStatus': 'published',
+                    'textFormat': 'plainText',
+                    'order': 'time' if by_time else 'relevance',
+                    'maxResults': 20
+                }
+                if next:
+                    params['pageToken'] = next
+                threads = self.get_commentThreads(
+                    resource_filter={'allThreadsRelatedToChannelId': channel_id},
+                    parts=('snippet','replies',),
+                    optional_params=params
+                )
+            except:
+                break
+
+            next = threads.nextPageToken
+
+            for comment in threads.comments:
+                yield comment.topLevelComment
+
+            if not next:
+                break
+
 
 class CommentThreadsAPI(Client):
     """
@@ -200,6 +301,37 @@ class CommentThreadsAPI(Client):
         comment_threads = CommentThreadList(response)
         return comment_threads
 
+    def post_reply(self, parts=('snippet',), optional_params={}):
+        """
+        Send a reply
+
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: Comment object or None
+        """
+        response = self.post_resource(parts, optional_params=optional_params).json()
+        try:
+            comment = Comment(response)
+        except:
+            comment = None
+        return comment
+
+    def post_comment(self, parts=('snippet',), optional_params={}):
+        """
+        Send a Top level comment
+
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: CommentThread object or None
+        """
+        response = self.post_resource(parts, optional_params=optional_params).json()
+        print(response)
+        try:
+            comment = CommentThread(response)
+        except:
+            comment = None
+        return comment
+
     def get_comments_by_id(self, video_id, by_time=True):
         """
         Returns a list of comments by video's ID
@@ -235,6 +367,62 @@ class CommentThreadsAPI(Client):
 
             if not next:
                 break
+
+
+    def send_reply(self, id: str, text: str):
+        """
+        Send a comment
+
+        :param video_id: string
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: Iterator of Comment objects
+        """
+        params = {
+            "snippet": {
+                "textOriginal": text,
+                "parentId": id
+            }
+        }
+
+        status = self.post_reply(
+            parts=('snippet',),
+            optional_params=params
+        )
+        if not isinstance(status, Comment):
+            raise Exception("Can't send a reply")
+
+
+    def send_comment(self, channel: str, text: str, video: str=None):
+        """
+        Send a comment
+
+        :param video_id: string
+        :param parts: tuple of strings https://developers.google.com/youtube/v3/getting-started#part
+        :param optional_params: dictionary, usually filter params
+        :return: Iterator of Comment objects
+        """
+        params = {
+            "snippet": {
+                "topLevelComment": {
+                    "snippet": {
+                        "textOriginal": text
+                    }
+                },
+                "channelId": channel
+            }
+        }
+        if video:
+            params["snippet"]["videoId"] = video
+
+        status = self.post_comment(
+            parts=('snippet',),
+            optional_params=params
+        )
+        print(status)
+        if not isinstance(status, CommentThread):
+            raise Exception("Can't send a comment")
+
 
     def get_comments_by_channel_id(self, channel_id, by_time=True):
         """

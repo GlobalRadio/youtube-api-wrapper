@@ -55,6 +55,7 @@ class Comment:
         self._snippet = kwargs.get("snippet", {})
         self.channel = Channel(id=self._snippet.get("channelId", {}))
         self.videoId = self._snippet.get("videoId", "")
+        self.url = f"https://www.youtube.com/watch?v={self.videoId}&lc={self.id}"
         self.display_text = self._snippet.get("textDisplay", "")
         self.text = self._snippet.get("textOriginal", "")
         self.parent = self._snippet.get("parentId", "")
