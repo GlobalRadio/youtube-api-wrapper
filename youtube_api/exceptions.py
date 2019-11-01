@@ -12,6 +12,13 @@ class YouTubeBadRequest(Exception):
     pass
 
 
+class YoutubeNotFound(Exception):
+    """
+    YouTube Not Found request encapsulation
+    """
+    pass
+
+
 class BadParametersRequest(Exception):
     """
     Bad Parameters in the requests
@@ -41,6 +48,13 @@ class OneFilterAllowed(BadParametersRequest):
 
 
 class OptionalParamNotAllowed(BadParametersRequest):
+    """
+
+    """
+    pass
+
+
+class BadKindOfResponse(BadParametersRequest):
     """
 
     """

@@ -1,3 +1,9 @@
+tests/
+youtube.py
+config.py
+.gitignore
+*.db
+
 # Pycharm IDE
 .idea/*
 
@@ -55,5 +61,3 @@ docs/_build/
 
 # PyBuilder
 target/
-
-
